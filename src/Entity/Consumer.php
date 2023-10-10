@@ -15,7 +15,7 @@ class Consumer
 
     #[ORM\ManyToOne(inversedBy: 'consumers')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Customer $customerId = null;
+    private ?Customer $customer = null;
 
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
@@ -34,14 +34,14 @@ class Consumer
         return $this->id;
     }
 
-    public function getCustomerId(): ?Customer
+    public function getCustomer(): ?Customer
     {
-        return $this->customerId;
+        return $this->customer;
     }
 
-    public function setCustomerId(?Customer $customerId): static
+    public function setCustomer(?Customer $customer): static
     {
-        $this->customerId = $customerId;
+        $this->customer = $customer;
 
         return $this;
     }
