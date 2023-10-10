@@ -85,7 +85,7 @@ class Customer
     {
         if (!$this->consumers->contains($consumer)) {
             $this->consumers->add($consumer);
-            $consumer->setCustomerId($this);
+            $consumer->setCustomer($this);
         }
 
         return $this;
@@ -95,8 +95,8 @@ class Customer
     {
         if ($this->consumers->removeElement($consumer)) {
             // set the owning side to null (unless already changed)
-            if ($consumer->getCustomerId() === $this) {
-                $consumer->setCustomerId(null);
+            if ($consumer->getCustomer() === $this) {
+                $consumer->setCustomer(null);
             }
         }
 
