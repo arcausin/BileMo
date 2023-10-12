@@ -3,10 +3,25 @@ app_phones_index:
     controller: App\Controller\PhoneController::index
     methods: [GET]
 
+app_phones_create:
+    path: /api/phones
+    controller: App\Controller\PhoneController::create
+    methods: [POST]
+
 app_phones_show:
     path: /api/phones/{id}
     controller: App\Controller\PhoneController::show
     methods: [GET]
+
+app_phones_update:
+    path: /api/phones/{id}
+    controller: App\Controller\PhoneController::update
+    methods: [PUT]
+
+app_phones_delete:
+    path: /api/phones/{id}
+    controller: App\Controller\PhoneController::delete
+    methods: [DELETE]
 
 app_customers_index:
     path: /api/customers
