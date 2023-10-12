@@ -1,3 +1,29 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
+app_phones_index:
+    path: /api/phones
+    controller: App\Controller\PhoneController::index
+    methods: [GET]
+
+app_phones_show:
+    path: /api/phones/{id}
+    controller: App\Controller\PhoneController::show
+    methods: [GET]
+
+app_customers_index:
+    path: /api/customers
+    controller: App\Controller\CustomerController::index
+    methods: [GET]
+
+app_customers_show:
+    path: /api/customers/{id}
+    controller: App\Controller\CustomerController::show
+    methods: [GET]
+
+app_consumers_index:
+    path: /api/consumers
+    controller: App\Controller\ConsumerController::index
+    methods: [GET]
+
+app_consumers_show:
+    path: /api/consumers/{id}
+    controller: App\Controller\ConsumerController::show
+    methods: [GET]
