@@ -23,15 +23,34 @@ app_phones_delete:
     controller: App\Controller\PhoneController::delete
     methods: [DELETE]
 
+
+
 app_customers_index:
     path: /api/customers
     controller: App\Controller\CustomerController::index
     methods: [GET]
 
+app_customers_create:
+    path: /api/customers
+    controller: App\Controller\CustomerController::create
+    methods: [POST]
+
 app_customers_show:
     path: /api/customers/{id}
     controller: App\Controller\CustomerController::show
     methods: [GET]
+
+app_customers_update:
+    path: /api/customers/{id}
+    controller: App\Controller\CustomerController::update
+    methods: [PUT]
+
+app_customers_delete:
+    path: /api/customers/{id}
+    controller: App\Controller\CustomerController::delete
+    methods: [DELETE]
+
+
 
 app_consumers_index:
     path: /api/consumers
