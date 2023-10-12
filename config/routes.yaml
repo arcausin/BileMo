@@ -57,7 +57,22 @@ app_consumers_index:
     controller: App\Controller\ConsumerController::index
     methods: [GET]
 
+app_consumers_create:
+    path: /api/consumers
+    controller: App\Controller\ConsumerController::create
+    methods: [POST]
+
 app_consumers_show:
     path: /api/consumers/{id}
     controller: App\Controller\ConsumerController::show
     methods: [GET]
+
+app_consumers_update:
+    path: /api/consumers/{id}
+    controller: App\Controller\ConsumerController::update
+    methods: [PUT]
+
+app_consumers_delete:
+    path: /api/consumers/{id}
+    controller: App\Controller\ConsumerController::delete
+    methods: [DELETE]
