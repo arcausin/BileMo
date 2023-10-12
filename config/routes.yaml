@@ -3,27 +3,76 @@ app_phones_index:
     controller: App\Controller\PhoneController::index
     methods: [GET]
 
+app_phones_create:
+    path: /api/phones
+    controller: App\Controller\PhoneController::create
+    methods: [POST]
+
 app_phones_show:
     path: /api/phones/{id}
     controller: App\Controller\PhoneController::show
     methods: [GET]
+
+app_phones_update:
+    path: /api/phones/{id}
+    controller: App\Controller\PhoneController::update
+    methods: [PUT]
+
+app_phones_delete:
+    path: /api/phones/{id}
+    controller: App\Controller\PhoneController::delete
+    methods: [DELETE]
+
+
 
 app_customers_index:
     path: /api/customers
     controller: App\Controller\CustomerController::index
     methods: [GET]
 
+app_customers_create:
+    path: /api/customers
+    controller: App\Controller\CustomerController::create
+    methods: [POST]
+
 app_customers_show:
     path: /api/customers/{id}
     controller: App\Controller\CustomerController::show
     methods: [GET]
+
+app_customers_update:
+    path: /api/customers/{id}
+    controller: App\Controller\CustomerController::update
+    methods: [PUT]
+
+app_customers_delete:
+    path: /api/customers/{id}
+    controller: App\Controller\CustomerController::delete
+    methods: [DELETE]
+
+
 
 app_consumers_index:
     path: /api/consumers
     controller: App\Controller\ConsumerController::index
     methods: [GET]
 
+app_consumers_create:
+    path: /api/consumers
+    controller: App\Controller\ConsumerController::create
+    methods: [POST]
+
 app_consumers_show:
     path: /api/consumers/{id}
     controller: App\Controller\ConsumerController::show
     methods: [GET]
+
+app_consumers_update:
+    path: /api/consumers/{id}
+    controller: App\Controller\ConsumerController::update
+    methods: [PUT]
+
+app_consumers_delete:
+    path: /api/consumers/{id}
+    controller: App\Controller\ConsumerController::delete
+    methods: [DELETE]
