@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer
@@ -19,11 +20,24 @@ class Customer
 
     #[ORM\Column(length: 255)]
     #[Groups(['getCustomers', 'getConsumers'])]
+    #[Assert\NotBlank(message: 'Name is required')]
+    #[Assert\Length(max: 255, maxMessage: 'Name cannot be longer than {{ limit }} characters')]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['getCustomers', 'getConsumers'])]
+    #[Assert\NotBlank(message: 'Email is required')]
+    #[Assert\Email(message: 'Email is not valid')]
     private ?string $email = null;
+
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Password is required')]
+    #[Assert\Length(min: 8, minMessage: 'Password must be at least {{ limit }} characters long')]
+    private ?string $password = null;
+
+    #[ORM\Column]
+    #[Groups(['getCustomers'])]
+    private array $roles = [];
 
     #[ORM\Column]
     #[Groups(['getCustomers', 'getConsumers'])]
@@ -63,6 +77,33 @@ class Customer
     public function setEmail(string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
 
         return $this;
     }

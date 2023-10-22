@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class PhoneController extends AbstractController
 {
@@ -26,11 +27,20 @@ class PhoneController extends AbstractController
     }
 
     #[Route('/api/phones', name: 'app_phones_create', methods: ['POST'])]
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
+    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $phone = $serializer->deserialize($request->getContent(), Phone::class, 'json');
+
+        $errors = $validator->validate($phone);
+
+        if ($errors->count() > 0) {
+            $jsonErrors = $serializer->serialize($errors, 'json');
+            return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
+        }
+
         $content = $request->toArray();
         $phone->setReleaseAt(new \DateTimeImmutable($content['releaseAt']));
+
         $em->persist($phone);
         $em->flush();
 
@@ -55,12 +65,23 @@ class PhoneController extends AbstractController
     }
 
     #[Route('/api/phones/{id}', name: 'app_phones_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, PhoneRepository $phoneRepository, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
+    public function update(int $id, Request $request, PhoneRepository $phoneRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         $phone = $phoneRepository->find($id);
 
         if ($phone) {
             $updatePhone = $serializer->deserialize($request->getContent(), Phone::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $phone]);
+
+            $errors = $validator->validate($updatePhone);
+
+            if ($errors->count() > 0) {
+                $jsonErrors = $serializer->serialize($errors, 'json');
+                return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
+            }
+
+            $content = $request->toArray();
+            $updatePhone->setReleaseAt(new \DateTimeImmutable($content['releaseAt']));
+
             $em->persist($updatePhone);
             $em->flush();
 

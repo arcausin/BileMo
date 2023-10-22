@@ -14,6 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ConsumerController extends AbstractController
 {
@@ -27,13 +28,22 @@ class ConsumerController extends AbstractController
     }
 
     #[Route('/api/consumers', name: 'app_consumers_create', methods: ['POST'])]
-    public function create(Request $request, SerializerInterface $serializer, CustomerRepository $customerRepository, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
+    public function create(Request $request, SerializerInterface $serializer, CustomerRepository $customerRepository, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $consumer = $serializer->deserialize($request->getContent(), Consumer::class, 'json');
+
+        $errors = $validator->validate($consumer);
+
+        if ($errors->count() > 0) {
+            $jsonErrors = $serializer->serialize($errors, 'json');
+            return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
+        }
+
         $content = $request->toArray();
         $idCustomer = $content['idCustomer'] ?? -1;
         $consumer->setCustomer($customerRepository->find($idCustomer));
         $consumer->setCreatedAt(new \DateTimeImmutable());
+
         $em->persist($consumer);
         $em->flush();
 
@@ -58,15 +68,24 @@ class ConsumerController extends AbstractController
     }
 
     #[Route('/api/consumers/{id}', name: 'app_consumers_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, ConsumerRepository $consumerRepository, SerializerInterface $serializer, CustomerRepository $customerRepository, EntityManagerInterface $em): JsonResponse
+    public function update(int $id, Request $request, ConsumerRepository $consumerRepository, SerializerInterface $serializer, CustomerRepository $customerRepository, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         $consumer = $consumerRepository->find($id);
 
         if ($consumer) {
             $updatedConsumer = $serializer->deserialize($request->getContent(), Consumer::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $consumer]);
+
+            $errors = $validator->validate($updatedConsumer);
+
+            if ($errors->count() > 0) {
+                $jsonErrors = $serializer->serialize($errors, 'json');
+                return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
+            }
+
             $content = $request->toArray();
             $idCustomer = $content['idCustomer'] ?? -1;
             $updatedConsumer->setCustomer($customerRepository->find($idCustomer));
+            
             $em->persist($updatedConsumer);
             $em->flush();
 

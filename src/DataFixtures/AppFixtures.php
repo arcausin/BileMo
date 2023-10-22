@@ -17,6 +17,7 @@ class AppFixtures extends Fixture
             $customer = new Customer();
             $customer->setName('Customer '.$i);
             $customer->setEmail('customer'.$i.'@test.com');
+            $customer->setPassword('password');
             $customer->setCreatedAt(new \DateTimeImmutable('now'));
             $manager->persist($customer);
 

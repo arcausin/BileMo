@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CustomerController extends AbstractController
 {
@@ -26,10 +27,19 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/api/customers', name: 'app_customers_create', methods: ['POST'])]
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator): JsonResponse
+    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
+
+        $errors = $validator->validate($customer);
+
+        if ($errors->count() > 0) {
+            $jsonErrors = $serializer->serialize($errors, 'json');
+            return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
+        }
+
         $customer->setCreatedAt(new \DateTimeImmutable());
+
         $em->persist($customer);
         $em->flush();
 
@@ -54,12 +64,20 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/api/customers/{id}', name: 'app_customers_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, CustomerRepository $customerRepository, SerializerInterface $serializer, EntityManagerInterface $em): JsonResponse
+    public function update(int $id, Request $request, CustomerRepository $customerRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         $customer = $customerRepository->find($id);
 
         if ($customer) {
             $updateCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $customer]);
+
+            $errors = $validator->validate($updateCustomer);
+
+            if ($errors->count() > 0) {
+                $jsonErrors = $serializer->serialize($errors, 'json');
+                return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
+            }
+            
             $em->persist($updateCustomer);
             $em->flush();
 

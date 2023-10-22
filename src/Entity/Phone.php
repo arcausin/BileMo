@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PhoneRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PhoneRepository::class)]
 class Phone
@@ -14,21 +15,32 @@ class Phone
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Brand is required')]
+    #[Assert\Length(max: 255, maxMessage: 'Brand cannot be longer than {{ limit }} characters')]
     private ?string $brand = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Model is required')]
+    #[Assert\Length(max: 255, maxMessage: 'Model cannot be longer than {{ limit }} characters')]
     private ?string $model = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Image is required')]
+    #[Assert\Length(max: 255, maxMessage: 'Image cannot be longer than {{ limit }} characters')]
     private ?string $image = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Price is required')]
+    #[Assert\Positive(message: 'Price must be positive')]
     private ?float $price = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Stock is required')]
+    #[Assert\PositiveOrZero(message: 'Stock must be positive or zero')]
     private ?int $stock = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Release date is required')]
     private ?\DateTimeImmutable $releaseAt = null;
 
     public function getId(): ?int
