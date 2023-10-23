@@ -5,11 +5,20 @@ namespace App\DataFixtures;
 use App\Entity\Customer;
 use App\Entity\Consumer;
 use App\Entity\Phone;
+
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    private $customerPasswordHasher;
+
+    public function __construct(UserPasswordHasherInterface $customerPasswordHasher)
+    {
+        $this->customerPasswordHasher = $customerPasswordHasher;
+    }
+
     public function load(ObjectManager $manager): void
     {
         // make 5 customers! Bam!
@@ -17,7 +26,7 @@ class AppFixtures extends Fixture
             $customer = new Customer();
             $customer->setName('Customer '.$i);
             $customer->setEmail('customer'.$i.'@test.com');
-            $customer->setPassword('password');
+            $customer->setPassword($this->customerPasswordHasher->hashPassword($customer, 'password'.$i));
             $customer->setCreatedAt(new \DateTimeImmutable('now'));
             $manager->persist($customer);
 
