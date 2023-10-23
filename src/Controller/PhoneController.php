@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Phone;
 use App\Repository\PhoneRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,7 @@ class PhoneController extends AbstractController
     }
 
     #[Route('/api/phones', name: 'app_phones_create', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $phone = $serializer->deserialize($request->getContent(), Phone::class, 'json');
@@ -65,6 +67,7 @@ class PhoneController extends AbstractController
     }
 
     #[Route('/api/phones/{id}', name: 'app_phones_update', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function update(int $id, Request $request, PhoneRepository $phoneRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         $phone = $phoneRepository->find($id);
@@ -92,6 +95,7 @@ class PhoneController extends AbstractController
     }
 
     #[Route('/api/phones/{id}', name: 'app_phones_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function delete(int $id, PhoneRepository $phoneRepository, EntityManagerInterface $em): JsonResponse
     {
         $phone = $phoneRepository->find($id);

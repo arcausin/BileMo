@@ -21,6 +21,15 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
+        // make 1 customer admin! Bam!
+        $customer = new Customer();
+        $customer->setName('Admin');
+        $customer->setEmail('admin@admin.com');
+        $customer->setPassword($this->customerPasswordHasher->hashPassword($customer, 'admin'));
+        $customer->setRoles(['ROLE_ADMIN']);
+        $customer->setCreatedAt(new \DateTimeImmutable('now'));
+        $manager->persist($customer);
+
         // make 5 customers! Bam!
         for ($i=1; $i <= 5; $i++) { 
             $customer = new Customer();
@@ -33,7 +42,7 @@ class AppFixtures extends Fixture
             // save customer in an array
             $customers[] = $customer;
         }
-
+        
         // make 10 consumers! Bam!
         for ($i=1; $i <= 10; $i++) { 
             $consumer = new Consumer();

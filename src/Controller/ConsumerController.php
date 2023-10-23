@@ -21,7 +21,13 @@ class ConsumerController extends AbstractController
     #[Route('/api/consumers', name: 'app_consumers_index', methods: ['GET'])]
     public function index(ConsumerRepository $consumerRepository, SerializerInterface $serializer): JsonResponse
     {
-        $consumers = $consumerRepository->findAll();
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $consumers = $consumerRepository->findAll();
+        }
+        else {
+            $consumers = $consumerRepository->findBy(['customer' => $this->getUser()]);
+        }
+
         $jsonConsumers = $serializer->serialize($consumers, 'json', ['groups' => 'getConsumers']);
 
         return new JsonResponse($jsonConsumers, Response::HTTP_OK, [], true);
@@ -39,9 +45,7 @@ class ConsumerController extends AbstractController
             return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
         }
 
-        $content = $request->toArray();
-        $idCustomer = $content['idCustomer'] ?? -1;
-        $consumer->setCustomer($customerRepository->find($idCustomer));
+        $consumer->setCustomer($customerRepository->find($this->getUser()));
         $consumer->setCreatedAt(new \DateTimeImmutable());
 
         $em->persist($consumer);
@@ -59,6 +63,10 @@ class ConsumerController extends AbstractController
     {
         $consumer = $consumerRepository->find($id);
 
+        if ($consumer->getCustomer() != $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
+            return new JsonResponse('Consumer not found', Response::HTTP_NOT_FOUND);
+        }
+
         if ($consumer) {
             $jsonConsumer = $serializer->serialize($consumer, 'json', ['groups' => 'getConsumers']);
             return new JsonResponse($jsonConsumer, Response::HTTP_OK, [], true);
@@ -72,6 +80,10 @@ class ConsumerController extends AbstractController
     {
         $consumer = $consumerRepository->find($id);
 
+        if ($consumer->getCustomer() != $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
+            return new JsonResponse('Consumer not found', Response::HTTP_NOT_FOUND);
+        }
+
         if ($consumer) {
             $updatedConsumer = $serializer->deserialize($request->getContent(), Consumer::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $consumer]);
 
@@ -81,10 +93,6 @@ class ConsumerController extends AbstractController
                 $jsonErrors = $serializer->serialize($errors, 'json');
                 return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
             }
-
-            $content = $request->toArray();
-            $idCustomer = $content['idCustomer'] ?? -1;
-            $updatedConsumer->setCustomer($customerRepository->find($idCustomer));
             
             $em->persist($updatedConsumer);
             $em->flush();
@@ -99,6 +107,10 @@ class ConsumerController extends AbstractController
     public function delete(int $id, ConsumerRepository $consumerRepository, EntityManagerInterface $em): JsonResponse
     {
         $consumer = $consumerRepository->find($id);
+
+        if ($consumer->getCustomer() != $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
+            return new JsonResponse('Consumer not found', Response::HTTP_NOT_FOUND);
+        }
 
         if ($consumer) {
             $em->remove($consumer);

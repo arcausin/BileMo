@@ -14,10 +14,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 class CustomerController extends AbstractController
 {
     #[Route('/api/customers', name: 'app_customers_index', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function index(CustomerRepository $customerRepository, SerializerInterface $serializer): JsonResponse
     {
         $customers = $customerRepository->findAll();
@@ -27,6 +29,7 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/api/customers', name: 'app_customers_create', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
     {
         $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
@@ -56,14 +59,17 @@ class CustomerController extends AbstractController
         $customer = $customerRepository->find($id);
 
         if ($customer) {
-            $jsonCustomer = $serializer->serialize($customer, 'json', ['groups' => 'getCustomers']);
-            return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
+            if ($customer === $this->getUser() || $this->isGranted('ROLE_ADMIN')) {
+                $jsonCustomer = $serializer->serialize($customer, 'json', ['groups' => 'getCustomers']);
+                return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
+            }
         }
 
         return new JsonResponse('Customer not found', Response::HTTP_NOT_FOUND);
     }
 
     #[Route('/api/customers/{id}', name: 'app_customers_update', methods: ['PUT'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function update(int $id, Request $request, CustomerRepository $customerRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
     {
         $customer = $customerRepository->find($id);
@@ -88,6 +94,7 @@ class CustomerController extends AbstractController
     }
 
     #[Route('/api/customers/{id}', name: 'app_customers_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function delete(int $id, CustomerRepository $customerRepository, EntityManagerInterface $em): JsonResponse
     {
         $customer = $customerRepository->find($id);
