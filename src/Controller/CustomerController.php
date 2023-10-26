@@ -15,30 +15,40 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class CustomerController extends AbstractController
 {
     #[Route('/api/customers', name: 'app_customers_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
-    public function index(CustomerRepository $customerRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function index(CustomerRepository $customerRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
     {
         $page = $request->query->get('page', 1);
         $limit = $request->query->get('limit', 5);
 
-        $customers = $customerRepository->findBy([], [], $limit, ($page - 1) * $limit);
+        $cacheKey = 'customers_' . $page . '_' . $limit;
 
-        if (empty($customers)) {
+        $jsonCustomerList = $cache->get($cacheKey, function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
+            echo "Cache miss\n";
+            $item->tag('customersCache');
+            $item->expiresAfter(300);
+
+            $customerList = $customerRepository->findBy([], [], $limit, ($page - 1) * $limit);
+
+            return $serializer->serialize($customerList, 'json', ['groups' => 'getCustomers']);
+        });
+
+        if (empty($jsonCustomerList) || $jsonCustomerList == '[]') {
             return new JsonResponse('Customers not found', Response::HTTP_NOT_FOUND);
         }
 
-        $jsonCustomers = $serializer->serialize($customers, 'json', ['groups' => 'getCustomers']);
-
-        return new JsonResponse($jsonCustomers, Response::HTTP_OK, [], true);
+        return new JsonResponse($jsonCustomerList, Response::HTTP_OK, [], true);
     }
 
     #[Route('/api/customers', name: 'app_customers_create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
         $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
 
@@ -51,6 +61,7 @@ class CustomerController extends AbstractController
 
         $customer->setCreatedAt(new \DateTimeImmutable());
 
+        $cache->invalidateTags(['customersCache']);
         $em->persist($customer);
         $em->flush();
 
@@ -78,7 +89,7 @@ class CustomerController extends AbstractController
 
     #[Route('/api/customers/{id}', name: 'app_customers_update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
-    public function update(int $id, Request $request, CustomerRepository $customerRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+    public function update(int $id, Request $request, CustomerRepository $customerRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
         $customer = $customerRepository->find($id);
 
@@ -92,6 +103,7 @@ class CustomerController extends AbstractController
                 return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
             }
             
+            $cache->invalidateTags(['customersCache']);
             $em->persist($updateCustomer);
             $em->flush();
 
@@ -103,11 +115,12 @@ class CustomerController extends AbstractController
 
     #[Route('/api/customers/{id}', name: 'app_customers_delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
-    public function delete(int $id, CustomerRepository $customerRepository, EntityManagerInterface $em): JsonResponse
+    public function delete(int $id, CustomerRepository $customerRepository, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
         $customer = $customerRepository->find($id);
 
         if ($customer) {
+            $cache->invalidateTags(['customersCache']);
             $em->remove($customer);
             $em->flush();
 

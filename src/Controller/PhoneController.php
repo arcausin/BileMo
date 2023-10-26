@@ -15,29 +15,39 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class PhoneController extends AbstractController
 {
     #[Route('/api/phones', name: 'app_phones_index', methods: ['GET'])]
-    public function index(PhoneRepository $phoneRepository, SerializerInterface $serializer, Request $request): JsonResponse
+    public function index(PhoneRepository $phoneRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
     {
         $page = $request->query->get('page', 1);
         $limit = $request->query->get('limit', 5);
 
-        $phones = $phoneRepository->findBy([], [], $limit, ($page - 1) * $limit);
+        $cacheKey = 'phones_' . $page . '_' . $limit;
 
-        if (empty($phones)) {
+        $jsonPhoneList = $cache->get($cacheKey, function (ItemInterface $item) use ($phoneRepository, $page, $limit, $serializer) {
+            echo "Cache miss\n";
+            $item->tag('phonesCache');
+            $item->expiresAfter(300);
+
+            $phoneList = $phoneRepository->findBy([], [], $limit, ($page - 1) * $limit);
+
+            return $serializer->serialize($phoneList, 'json');
+        });
+
+        if (empty($jsonPhoneList) || $jsonPhoneList == '[]') {
             return new JsonResponse('Phones not found', Response::HTTP_NOT_FOUND);
         }
 
-        $jsonPhones = $serializer->serialize($phones, 'json');
-
-        return new JsonResponse($jsonPhones, Response::HTTP_OK, [], true);
+        return new JsonResponse($jsonPhoneList, Response::HTTP_OK, [], true);
     }
 
     #[Route('/api/phones', name: 'app_phones_create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
-    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
         $phone = $serializer->deserialize($request->getContent(), Phone::class, 'json');
 
@@ -51,6 +61,7 @@ class PhoneController extends AbstractController
         $content = $request->toArray();
         $phone->setReleaseAt(new \DateTimeImmutable($content['releaseAt']));
 
+        $cache->invalidateTags(['phonesCache']);
         $em->persist($phone);
         $em->flush();
 
@@ -76,7 +87,7 @@ class PhoneController extends AbstractController
 
     #[Route('/api/phones/{id}', name: 'app_phones_update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
-    public function update(int $id, Request $request, PhoneRepository $phoneRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator): JsonResponse
+    public function update(int $id, Request $request, PhoneRepository $phoneRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
         $phone = $phoneRepository->find($id);
 
@@ -93,6 +104,7 @@ class PhoneController extends AbstractController
             $content = $request->toArray();
             $updatePhone->setReleaseAt(new \DateTimeImmutable($content['releaseAt']));
 
+            $cache->invalidateTags(['phonesCache']);
             $em->persist($updatePhone);
             $em->flush();
 
@@ -104,11 +116,12 @@ class PhoneController extends AbstractController
 
     #[Route('/api/phones/{id}', name: 'app_phones_delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
-    public function delete(int $id, PhoneRepository $phoneRepository, EntityManagerInterface $em): JsonResponse
+    public function delete(int $id, PhoneRepository $phoneRepository, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
     {
         $phone = $phoneRepository->find($id);
 
         if ($phone) {
+            $cache->invalidateTags(['phonesCache']);
             $em->remove($phone);
             $em->flush();
 
