@@ -19,13 +19,20 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class ConsumerController extends AbstractController
 {
     #[Route('/api/consumers', name: 'app_consumers_index', methods: ['GET'])]
-    public function index(ConsumerRepository $consumerRepository, SerializerInterface $serializer): JsonResponse
+    public function index(ConsumerRepository $consumerRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
+        $page = $request->query->get('page', 1);
+        $limit = $request->query->get('limit', 5);
+
         if ($this->isGranted('ROLE_ADMIN')) {
-            $consumers = $consumerRepository->findAll();
+            $consumers = $consumerRepository->findBy([], [], $limit, ($page - 1) * $limit);
         }
         else {
-            $consumers = $consumerRepository->findBy(['customer' => $this->getUser()]);
+            $consumers = $consumerRepository->findBy(['customer' => $this->getUser()], [], $limit, ($page - 1) * $limit);
+        }
+
+        if (empty($consumers)) {
+            return new JsonResponse('Consumers not found', Response::HTTP_NOT_FOUND);
         }
 
         $jsonConsumers = $serializer->serialize($consumers, 'json', ['groups' => 'getConsumers']);

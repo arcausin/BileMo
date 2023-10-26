@@ -19,9 +19,17 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class PhoneController extends AbstractController
 {
     #[Route('/api/phones', name: 'app_phones_index', methods: ['GET'])]
-    public function index(PhoneRepository $phoneRepository, SerializerInterface $serializer): JsonResponse
+    public function index(PhoneRepository $phoneRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
-        $phones = $phoneRepository->findAll();
+        $page = $request->query->get('page', 1);
+        $limit = $request->query->get('limit', 5);
+
+        $phones = $phoneRepository->findBy([], [], $limit, ($page - 1) * $limit);
+
+        if (empty($phones)) {
+            return new JsonResponse('Phones not found', Response::HTTP_NOT_FOUND);
+        }
+
         $jsonPhones = $serializer->serialize($phones, 'json');
 
         return new JsonResponse($jsonPhones, Response::HTTP_OK, [], true);
