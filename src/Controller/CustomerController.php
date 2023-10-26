@@ -20,9 +20,17 @@ class CustomerController extends AbstractController
 {
     #[Route('/api/customers', name: 'app_customers_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
-    public function index(CustomerRepository $customerRepository, SerializerInterface $serializer): JsonResponse
+    public function index(CustomerRepository $customerRepository, SerializerInterface $serializer, Request $request): JsonResponse
     {
-        $customers = $customerRepository->findAll();
+        $page = $request->query->get('page', 1);
+        $limit = $request->query->get('limit', 5);
+
+        $customers = $customerRepository->findBy([], [], $limit, ($page - 1) * $limit);
+
+        if (empty($customers)) {
+            return new JsonResponse('Customers not found', Response::HTTP_NOT_FOUND);
+        }
+
         $jsonCustomers = $serializer->serialize($customers, 'json', ['groups' => 'getCustomers']);
 
         return new JsonResponse($jsonCustomers, Response::HTTP_OK, [], true);
