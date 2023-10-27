@@ -10,10 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -92,9 +91,15 @@ class PhoneController extends AbstractController
         $phone = $phoneRepository->find($id);
 
         if ($phone) {
-            $updatePhone = $serializer->deserialize($request->getContent(), Phone::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $phone]);
+            $updatePhone = $serializer->deserialize($request->getContent(), Phone::class, 'json');
 
-            $errors = $validator->validate($updatePhone);
+            $phone->setBrand($updatePhone->getBrand());
+            $phone->setModel($updatePhone->getModel());
+            $phone->setImage($updatePhone->getImage());
+            $phone->setPrice($updatePhone->getPrice());
+            $phone->setStock($updatePhone->getStock());
+
+            $errors = $validator->validate($phone);
 
             if ($errors->count() > 0) {
                 $jsonErrors = $serializer->serialize($errors, 'json');
@@ -102,10 +107,10 @@ class PhoneController extends AbstractController
             }
 
             $content = $request->toArray();
-            $updatePhone->setReleaseAt(new \DateTimeImmutable($content['releaseAt']));
+            $phone->setReleaseAt(new \DateTimeImmutable($content['releaseAt']));
 
             $cache->invalidateTags(['phonesCache']);
-            $em->persist($updatePhone);
+            $em->persist($phone);
             $em->flush();
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);

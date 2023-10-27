@@ -6,11 +6,12 @@ use App\Entity\Consumer;
 use App\Repository\ConsumerRepository;
 use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -35,18 +36,18 @@ class ConsumerController extends AbstractController
 
             if ($this->isGranted('ROLE_ADMIN')) {
                 $consumerList = $consumerRepository->findBy([], [], $limit, ($page - 1) * $limit);
-            }
-            else {
+            } else {
                 $consumerList = $consumerRepository->findBy(['customer' => $this->getUser()], [], $limit, ($page - 1) * $limit);
             }
 
-            return $serializer->serialize($consumerList, 'json', ['groups' => 'getConsumers']);
+            $context = SerializationContext::create()->setGroups(['getConsumers']);
+            return $serializer->serialize($consumerList, 'json', $context);
         });
 
         if (empty($jsonConsumerList) || $jsonConsumerList == '[]') {
             return new JsonResponse('Consumers not found', Response::HTTP_NOT_FOUND);
         }
-        
+
         return new JsonResponse($jsonConsumerList, Response::HTTP_OK, [], true);
     }
 
@@ -69,7 +70,8 @@ class ConsumerController extends AbstractController
         $em->persist($consumer);
         $em->flush();
 
-        $jsonConsumer = $serializer->serialize($consumer, 'json', ['groups' => 'getConsumers']);
+        $context = SerializationContext::create()->setGroups(['getConsumers']);
+        $jsonConsumer = $serializer->serialize($consumer, 'json', $context);
 
         $location = $urlGenerator->generate('app_consumers_show', ['id' => $consumer->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -86,7 +88,8 @@ class ConsumerController extends AbstractController
         }
 
         if ($consumer) {
-            $jsonConsumer = $serializer->serialize($consumer, 'json', ['groups' => 'getConsumers']);
+            $context = SerializationContext::create()->setGroups(['getConsumers']);
+            $jsonConsumer = $serializer->serialize($consumer, 'json', $context);
             return new JsonResponse($jsonConsumer, Response::HTTP_OK, [], true);
         }
 
@@ -94,7 +97,7 @@ class ConsumerController extends AbstractController
     }
 
     #[Route('/api/consumers/{id}', name: 'app_consumers_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, ConsumerRepository $consumerRepository, SerializerInterface $serializer, CustomerRepository $customerRepository, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
+    public function update(int $id, Request $request, ConsumerRepository $consumerRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
     {
         $consumer = $consumerRepository->find($id);
 
@@ -103,17 +106,21 @@ class ConsumerController extends AbstractController
         }
 
         if ($consumer) {
-            $updatedConsumer = $serializer->deserialize($request->getContent(), Consumer::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $consumer]);
+            $updateConsumer = $serializer->deserialize($request->getContent(), Consumer::class, 'json');
 
-            $errors = $validator->validate($updatedConsumer);
+            $consumer->setFirstName($updateConsumer->getFirstName());
+            $consumer->setLastName($updateConsumer->getLastName());
+            $consumer->setEmail($updateConsumer->getEmail());
+
+            $errors = $validator->validate($consumer);
 
             if ($errors->count() > 0) {
                 $jsonErrors = $serializer->serialize($errors, 'json');
                 return new JsonResponse($jsonErrors, Response::HTTP_BAD_REQUEST, [], true);
             }
-            
+
             $cache->invalidateTags(['consumersCache']);
-            $em->persist($updatedConsumer);
+            $em->persist($consumer);
             $em->flush();
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);

@@ -5,21 +5,29 @@ namespace App\Controller;
 use App\Entity\Customer;
 use App\Repository\CustomerRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class CustomerController extends AbstractController
 {
+    private $customerPasswordHasher;
+
+    public function __construct(UserPasswordHasherInterface $customerPasswordHasher)
+    {
+        $this->customerPasswordHasher = $customerPasswordHasher;
+    }
+
     #[Route('/api/customers', name: 'app_customers_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function index(CustomerRepository $customerRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
@@ -36,7 +44,8 @@ class CustomerController extends AbstractController
 
             $customerList = $customerRepository->findBy([], [], $limit, ($page - 1) * $limit);
 
-            return $serializer->serialize($customerList, 'json', ['groups' => 'getCustomers']);
+            $context = SerializationContext::create()->setGroups(['getCustomers']);
+            return $serializer->serialize($customerList, 'json', $context);
         });
 
         if (empty($jsonCustomerList) || $jsonCustomerList == '[]') {
@@ -60,12 +69,14 @@ class CustomerController extends AbstractController
         }
 
         $customer->setCreatedAt(new \DateTimeImmutable());
+        $customer->setPassword($this->customerPasswordHasher->hashPassword($customer, $customer->getPassword()));
 
         $cache->invalidateTags(['customersCache']);
         $em->persist($customer);
         $em->flush();
 
-        $jsonCustomer = $serializer->serialize($customer, 'json', ['groups' => 'getCustomers']);
+        $context = SerializationContext::create()->setGroups(['getCustomers']);
+        $jsonCustomer = $serializer->serialize($customer, 'json', $context);
 
         $location = $urlGenerator->generate('app_customers_show', ['id' => $customer->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -79,7 +90,8 @@ class CustomerController extends AbstractController
 
         if ($customer) {
             if ($customer === $this->getUser() || $this->isGranted('ROLE_ADMIN')) {
-                $jsonCustomer = $serializer->serialize($customer, 'json', ['groups' => 'getCustomers']);
+                $context = SerializationContext::create()->setGroups(['getCustomers']);
+                $jsonCustomer = $serializer->serialize($customer, 'json', $context);
                 return new JsonResponse($jsonCustomer, Response::HTTP_OK, [], true);
             }
         }
@@ -94,9 +106,13 @@ class CustomerController extends AbstractController
         $customer = $customerRepository->find($id);
 
         if ($customer) {
-            $updateCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $customer]);
+            $updateCustomer = $serializer->deserialize($request->getContent(), Customer::class, 'json');
 
-            $errors = $validator->validate($updateCustomer);
+            $customer->setName($updateCustomer->getName());
+            $customer->setEmail($updateCustomer->getEmail());
+            $customer->setPassword($this->customerPasswordHasher->hashPassword($customer, $updateCustomer->getPassword()));
+
+            $errors = $validator->validate($customer);
 
             if ($errors->count() > 0) {
                 $jsonErrors = $serializer->serialize($errors, 'json');
@@ -104,7 +120,7 @@ class CustomerController extends AbstractController
             }
             
             $cache->invalidateTags(['customersCache']);
-            $em->persist($updateCustomer);
+            $em->persist($customer);
             $em->flush();
 
             return new JsonResponse(null, Response::HTTP_NO_CONTENT);
