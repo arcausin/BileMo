@@ -5,6 +5,44 @@ namespace App\Entity;
 use App\Repository\PhoneRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
+
+/**
+ * @Hateoas\Relation(
+ *      "[POST]",
+ *      href = @Hateoas\Route(
+ *          "app_phones_create"
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(excludeIf = "expr(not is_granted('ROLE_ADMIN'))")
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "[GET]",
+ *      href = @Hateoas\Route(
+ *          "app_phones_show",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      )
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "[PUT]",
+ *      href = @Hateoas\Route(
+ *          "app_phones_update",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(excludeIf = "expr(not is_granted('ROLE_ADMIN'))")
+ * )
+ *
+ * @Hateoas\Relation(
+ *      "[DELETE]",
+ *      href = @Hateoas\Route(
+ *          "app_phones_delete",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(excludeIf = "expr(not is_granted('ROLE_ADMIN'))")
+ * )
+ * 
+ */
 
 #[ORM\Entity(repositoryClass: PhoneRepository::class)]
 class Phone

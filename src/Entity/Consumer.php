@@ -6,6 +6,45 @@ use App\Repository\ConsumerRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
+
+/**
+ * @Hateoas\Relation(
+ *      "[POST]",
+ *      href = @Hateoas\Route(
+ *          "app_consumers_create"
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="getConsumers")
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "[GET]",
+ *      href = @Hateoas\Route(
+ *          "app_consumers_show",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="getConsumers")
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "[PUT]",
+ *      href = @Hateoas\Route(
+ *          "app_consumers_update",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="getConsumers")
+ * )
+ *
+ * @Hateoas\Relation(
+ *      "[DELETE]",
+ *      href = @Hateoas\Route(
+ *          "app_consumers_delete",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="getConsumers")
+ * )
+ * 
+ */
 
 #[ORM\Entity(repositoryClass: ConsumerRepository::class)]
 class Consumer
