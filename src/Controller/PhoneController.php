@@ -16,9 +16,45 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 class PhoneController extends AbstractController
 {
+    /**
+     * This method allows you to recover all the phones.
+     *
+     * @OA\Response(
+     *     response=200,
+     *     description="Return the list of phones",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Phone::class, groups={"getPhones"}))
+     *     )
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="page",
+     *     in="query",
+     *     description="The page you want to retrieve",
+     *     @OA\Schema(type="int")
+     * )
+     *
+     * @OA\Parameter(
+     *     name="limit",
+     *     in="query",
+     *     description="The number of items you want to recover",
+     *     @OA\Schema(type="int")
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     *
+     * @param PhoneRepository $phoneRepository
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @return JsonResponse
+     */
     #[Route('/api/phones', name: 'app_phones_index', methods: ['GET'])]
     public function index(PhoneRepository $phoneRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
     {
@@ -44,6 +80,69 @@ class PhoneController extends AbstractController
         return new JsonResponse($jsonPhoneList, Response::HTTP_OK, [], true);
     }
 
+    /**
+     * This method allows you to create a phone.
+     * 
+     * @OA\Response(
+     *     response=201,
+     *     description="Create a phone",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Phone::class, groups={"getPhones"}))
+     *     )
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="brand",
+     *     in="query",
+     *     description="The brand of the phone",
+     *     @OA\Schema(type="string")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="model",
+     *     in="query",
+     *     description="The model of the phone",
+     *     @OA\Schema(type="string")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="image",
+     *     in="query",
+     *     description="The image of the phone",
+     *     @OA\Schema(type="string")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="price",
+     *     in="query",
+     *     description="The price of the phone",
+     *     @OA\Schema(type="float")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="stock",
+     *     in="query",
+     *     description="The stock of the phone",
+     *     @OA\Schema(type="int")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="releaseAt",
+     *     in="query",
+     *     description="The release date of the phone",
+     *     @OA\Schema(type="string")
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     * 
+     * @param Request $request
+     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $em
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param ValidatorInterface $validator
+     * @return JsonResponse
+    */
     #[Route('/api/phones', name: 'app_phones_create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
@@ -71,6 +170,25 @@ class PhoneController extends AbstractController
         return new JsonResponse($jsonPhone, Response::HTTP_CREATED, ['Location' => $location], true);
     }
 
+    /**
+     * This method allows you to recover a phone.
+     * 
+     * @OA\Response(
+     *     response=200,
+     *     description="Return a phone",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Phone::class, groups={"getPhones"}))
+     *    )
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     * 
+     * @param int $id
+     * @param PhoneRepository $phoneRepository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     #[Route('/api/phones/{id}', name: 'app_phones_show', methods: ['GET'])]
     public function show(int $id, PhoneRepository $phoneRepository, SerializerInterface $serializer): JsonResponse
     {
@@ -84,6 +202,66 @@ class PhoneController extends AbstractController
         return new JsonResponse('Phone not found', Response::HTTP_NOT_FOUND);
     }
 
+    /**
+     * This method allows you to update a phone.
+     * 
+     * @OA\Response(
+     *     response=204,
+     *     description="Update a phone"
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="brand",
+     *     in="query",
+     *     description="The brand of the phone",
+     *     @OA\Schema(type="string")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="model",
+     *     in="query",
+     *     description="The model of the phone",
+     *     @OA\Schema(type="string")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="image",
+     *     in="query",
+     *     description="The image of the phone",
+     *     @OA\Schema(type="string")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="price",
+     *     in="query",
+     *     description="The price of the phone",
+     *     @OA\Schema(type="float")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="stock",
+     *     in="query",
+     *     description="The stock of the phone",
+     *     @OA\Schema(type="int")
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="releaseAt",
+     *     in="query",
+     *     description="The release date of the phone",
+     *     @OA\Schema(type="string")
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     * 
+     * @param int $id
+     * @param Request $request
+     * @param PhoneRepository $phoneRepository
+     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $em
+     * @param ValidatorInterface $validator
+     * @return JsonResponse
+    */
     #[Route('/api/phones/{id}', name: 'app_phones_update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function update(int $id, Request $request, PhoneRepository $phoneRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
@@ -119,6 +297,21 @@ class PhoneController extends AbstractController
         return new JsonResponse('Phone not found', Response::HTTP_NOT_FOUND);
     }
 
+    /**
+     * This method allows you to delete a phone.
+     * 
+     * @OA\Response(
+     *     response=204,
+     *     description="Delete a phone"
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     * 
+     * @param int $id
+     * @param PhoneRepository $phoneRepository
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+    */
     #[Route('/api/phones/{id}', name: 'app_phones_delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function delete(int $id, PhoneRepository $phoneRepository, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse
