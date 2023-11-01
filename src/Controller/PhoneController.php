@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Phone;
 use App\Repository\PhoneRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,9 +17,45 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
 
 class PhoneController extends AbstractController
 {
+    /**
+     * This method allows you to recover all the phones.
+     *
+     * @OA\Response(
+     *     response=200,
+     *     description="Return the list of phones",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Phone::class, groups={"getPhones"}))
+     *     )
+     * )
+     * 
+     * @OA\Parameter(
+     *     name="page",
+     *     in="query",
+     *     description="The page you want to retrieve",
+     *     @OA\Schema(type="int")
+     * )
+     *
+     * @OA\Parameter(
+     *     name="limit",
+     *     in="query",
+     *     description="The number of items you want to recover",
+     *     @OA\Schema(type="int")
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     *
+     * @param PhoneRepository $phoneRepository
+     * @param SerializerInterface $serializer
+     * @param Request $request
+     * @return JsonResponse
+     */
     #[Route('/api/phones', name: 'app_phones_index', methods: ['GET'])]
     public function index(PhoneRepository $phoneRepository, SerializerInterface $serializer, Request $request, TagAwareCacheInterface $cache): JsonResponse
     {
@@ -28,13 +65,14 @@ class PhoneController extends AbstractController
         $cacheKey = 'phones_' . $page . '_' . $limit;
 
         $jsonPhoneList = $cache->get($cacheKey, function (ItemInterface $item) use ($phoneRepository, $page, $limit, $serializer) {
-            echo "Cache miss\n";
+            //echo "Cache miss\n";
             $item->tag('phonesCache');
             $item->expiresAfter(300);
 
             $phoneList = $phoneRepository->findBy([], [], $limit, ($page - 1) * $limit);
 
-            return $serializer->serialize($phoneList, 'json');
+            $context = SerializationContext::create()->setGroups(['getPhones']);
+            return $serializer->serialize($phoneList, 'json', $context);
         });
 
         if (empty($jsonPhoneList) || $jsonPhoneList == '[]') {
@@ -44,6 +82,40 @@ class PhoneController extends AbstractController
         return new JsonResponse($jsonPhoneList, Response::HTTP_OK, [], true);
     }
 
+    /**
+     * This method allows you to create a phone.
+     * 
+     * @OA\Response(
+     *     response=201,
+     *     description="Create a phone",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Phone::class, groups={"getPhones"}))
+     *     )
+     * )
+     * 
+     * @OA\RequestBody(
+     *     description="Create a phone",
+     *     required=true,
+     *     @OA\JsonContent(
+     *         @OA\Property(property="brand", type="string", default="Iphone"),
+     *         @OA\Property(property="model", type="string", default="15"),
+     *         @OA\Property(property="image", type="string", default="/images/iphone-15.jpg"),
+     *         @OA\Property(property="price", type="float", default="2400"),
+     *         @OA\Property(property="stock", type="int", default="12"),
+     *         @OA\Property(property="releaseAt", type="string", default="2023-10-21T07:11:07+00:00")
+     *     )
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     * 
+     * @param Request $request
+     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $em
+     * @param UrlGeneratorInterface $urlGenerator
+     * @param ValidatorInterface $validator
+     * @return JsonResponse
+    */
     #[Route('/api/phones', name: 'app_phones_create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function create(Request $request, SerializerInterface $serializer, EntityManagerInterface $em, UrlGeneratorInterface $urlGenerator, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
@@ -64,26 +136,78 @@ class PhoneController extends AbstractController
         $em->persist($phone);
         $em->flush();
 
-        $jsonPhone = $serializer->serialize($phone, 'json');
+        $context = SerializationContext::create()->setGroups(['getPhones']);
+        $jsonPhone = $serializer->serialize($phone, 'json', $context);
 
         $location = $urlGenerator->generate('app_phones_show', ['id' => $phone->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonPhone, Response::HTTP_CREATED, ['Location' => $location], true);
     }
 
+    /**
+     * This method allows you to recover a phone.
+     * 
+     * @OA\Response(
+     *     response=200,
+     *     description="Return a phone",
+     *     @OA\JsonContent(
+     *        type="array",
+     *        @OA\Items(ref=@Model(type=Phone::class, groups={"getPhones"}))
+     *    )
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     * 
+     * @param int $id
+     * @param PhoneRepository $phoneRepository
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
     #[Route('/api/phones/{id}', name: 'app_phones_show', methods: ['GET'])]
     public function show(int $id, PhoneRepository $phoneRepository, SerializerInterface $serializer): JsonResponse
     {
         $phone = $phoneRepository->find($id);
 
         if ($phone) {
-            $jsonPhone = $serializer->serialize($phone, 'json');
+            $context = SerializationContext::create()->setGroups(['getPhones']);
+            $jsonPhone = $serializer->serialize($phone, 'json', $context);
             return new JsonResponse($jsonPhone, Response::HTTP_OK, [], true);
         }
 
         return new JsonResponse('Phone not found', Response::HTTP_NOT_FOUND);
     }
 
+    /**
+     * This method allows you to update a phone.
+     * 
+     * @OA\Response(
+     *     response=204,
+     *     description="Update a phone"
+     * )
+     * 
+     * @OA\RequestBody(
+     *     description="Update a phone",
+     *     required=true,
+     *     @OA\JsonContent(
+     *         @OA\Property(property="brand", type="string", default="Iphone"),
+     *         @OA\Property(property="model", type="string", default="15"),
+     *         @OA\Property(property="image", type="string", default="/images/iphone-15.jpg"),
+     *         @OA\Property(property="price", type="float", default="2400"),
+     *         @OA\Property(property="stock", type="int", default="12"),
+     *         @OA\Property(property="releaseAt", type="string", default="2023-10-21T07:11:07+00:00")
+     *     )
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     * 
+     * @param int $id
+     * @param Request $request
+     * @param PhoneRepository $phoneRepository
+     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $em
+     * @param ValidatorInterface $validator
+     * @return JsonResponse
+    */
     #[Route('/api/phones/{id}', name: 'app_phones_update', methods: ['PUT'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function update(int $id, Request $request, PhoneRepository $phoneRepository, SerializerInterface $serializer, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
@@ -119,6 +243,21 @@ class PhoneController extends AbstractController
         return new JsonResponse('Phone not found', Response::HTTP_NOT_FOUND);
     }
 
+    /**
+     * This method allows you to delete a phone.
+     * 
+     * @OA\Response(
+     *     response=204,
+     *     description="Delete a phone"
+     * )
+     * 
+     * @OA\Tag(name="Phones")
+     * 
+     * @param int $id
+     * @param PhoneRepository $phoneRepository
+     * @param EntityManagerInterface $em
+     * @return JsonResponse
+    */
     #[Route('/api/phones/{id}', name: 'app_phones_delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN', message: 'Only admins can access this resource')]
     public function delete(int $id, PhoneRepository $phoneRepository, EntityManagerInterface $em, TagAwareCacheInterface $cache): JsonResponse

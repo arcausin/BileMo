@@ -51,7 +51,7 @@ class Consumer
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     #[Groups(['getCustomers', 'getConsumers'])]
     private ?int $id = null;
 
@@ -61,25 +61,25 @@ class Consumer
     //#[Assert\NotBlank(message: 'Customer is required')]
     private ?Customer $customer = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['getCustomers', 'getConsumers'])]
     #[Assert\NotBlank(message: 'First name is required')]
     #[Assert\Length(max: 255, maxMessage: 'First name cannot be longer than {{ limit }} characters')]
     private ?string $firstName = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['getCustomers', 'getConsumers'])]
     #[Assert\NotBlank(message: 'Last name is required')]
     #[Assert\Length(max: 255, maxMessage: 'Last name cannot be longer than {{ limit }} characters')]
     private ?string $lastName = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['getCustomers', 'getConsumers'])]
     #[Assert\NotBlank(message: 'Email is required')]
     #[Assert\Email(message: 'Email is not valid')]
     private ?string $email = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['getCustomers', 'getConsumers'])]
     private ?\DateTimeImmutable $createdAt = null;
 

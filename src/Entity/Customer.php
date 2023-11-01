@@ -55,32 +55,32 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     #[Groups(['getCustomers', 'getConsumers'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['getCustomers', 'getConsumers'])]
     #[Assert\NotBlank(message: 'Name is required')]
     #[Assert\Length(max: 255, maxMessage: 'Name cannot be longer than {{ limit }} characters')]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['getCustomers', 'getConsumers'])]
     #[Assert\NotBlank(message: 'Email is required')]
     #[Assert\Email(message: 'Email is not valid')]
     private ?string $email = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Password is required')]
     #[Assert\Length(min: 8, minMessage: 'Password must be at least {{ limit }} characters long')]
     private ?string $password = null;
 
-    #[ORM\Column]
+    #[ORM\Column()]
     #[Groups(['getCustomers'])]
     private array $roles = [];
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime_immutable')]
     #[Groups(['getCustomers', 'getConsumers'])]
     private ?\DateTimeImmutable $createdAt = null;
 
