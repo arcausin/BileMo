@@ -4,9 +4,9 @@ namespace App\Entity;
 
 use App\Repository\PhoneRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Hateoas\Configuration\Annotation as Hateoas;
-use JMS\Serializer\Annotation\Groups;
 
 /**
  * @Hateoas\Relation(
@@ -50,41 +50,41 @@ class Phone
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     #[Groups(['getPhones'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Brand is required')]
     #[Assert\Length(max: 255, maxMessage: 'Brand cannot be longer than {{ limit }} characters')]
     #[Groups(['getPhones'])]
     private ?string $brand = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Model is required')]
     #[Assert\Length(max: 255, maxMessage: 'Model cannot be longer than {{ limit }} characters')]
     #[Groups(['getPhones'])]
     private ?string $model = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Image is required')]
     #[Assert\Length(max: 255, maxMessage: 'Image cannot be longer than {{ limit }} characters')]
     #[Groups(['getPhones'])]
     private ?string $image = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     #[Assert\NotBlank(message: 'Price is required')]
     #[Assert\Positive(message: 'Price must be positive')]
     #[Groups(['getPhones'])]
     private ?float $price = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     #[Assert\NotBlank(message: 'Stock is required')]
     #[Assert\PositiveOrZero(message: 'Stock must be positive or zero')]
     #[Groups(['getPhones'])]
     private ?int $stock = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime_immutable')]
     #[Assert\NotBlank(message: 'Release date is required')]
     #[Groups(['getPhones'])]
     private ?\DateTimeImmutable $releaseAt = null;

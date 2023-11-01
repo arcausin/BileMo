@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Phone;
 use App\Repository\PhoneRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -64,13 +65,14 @@ class PhoneController extends AbstractController
         $cacheKey = 'phones_' . $page . '_' . $limit;
 
         $jsonPhoneList = $cache->get($cacheKey, function (ItemInterface $item) use ($phoneRepository, $page, $limit, $serializer) {
-            echo "Cache miss\n";
+            //echo "Cache miss\n";
             $item->tag('phonesCache');
             $item->expiresAfter(300);
 
             $phoneList = $phoneRepository->findBy([], [], $limit, ($page - 1) * $limit);
 
-            return $serializer->serialize($phoneList, 'json');
+            $context = SerializationContext::create()->setGroups(['getPhones']);
+            return $serializer->serialize($phoneList, 'json', $context);
         });
 
         if (empty($jsonPhoneList) || $jsonPhoneList == '[]') {
@@ -92,46 +94,17 @@ class PhoneController extends AbstractController
      *     )
      * )
      * 
-     * @OA\Parameter(
-     *     name="brand",
-     *     in="query",
-     *     description="The brand of the phone",
-     *     @OA\Schema(type="string")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="model",
-     *     in="query",
-     *     description="The model of the phone",
-     *     @OA\Schema(type="string")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="image",
-     *     in="query",
-     *     description="The image of the phone",
-     *     @OA\Schema(type="string")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="price",
-     *     in="query",
-     *     description="The price of the phone",
-     *     @OA\Schema(type="float")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="stock",
-     *     in="query",
-     *     description="The stock of the phone",
-     *     @OA\Schema(type="int")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="releaseAt",
-     *     in="query",
-     *     description="The release date of the phone",
-     *     @OA\Schema(type="string")
+     * @OA\RequestBody(
+     *     description="Create a phone",
+     *     required=true,
+     *     @OA\JsonContent(
+     *         @OA\Property(property="brand", type="string", default="Iphone"),
+     *         @OA\Property(property="model", type="string", default="15"),
+     *         @OA\Property(property="image", type="string", default="/images/iphone-15.jpg"),
+     *         @OA\Property(property="price", type="float", default="2400"),
+     *         @OA\Property(property="stock", type="int", default="12"),
+     *         @OA\Property(property="releaseAt", type="string", default="2023-10-21T07:11:07+00:00")
+     *     )
      * )
      * 
      * @OA\Tag(name="Phones")
@@ -163,7 +136,8 @@ class PhoneController extends AbstractController
         $em->persist($phone);
         $em->flush();
 
-        $jsonPhone = $serializer->serialize($phone, 'json');
+        $context = SerializationContext::create()->setGroups(['getPhones']);
+        $jsonPhone = $serializer->serialize($phone, 'json', $context);
 
         $location = $urlGenerator->generate('app_phones_show', ['id' => $phone->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -195,7 +169,8 @@ class PhoneController extends AbstractController
         $phone = $phoneRepository->find($id);
 
         if ($phone) {
-            $jsonPhone = $serializer->serialize($phone, 'json');
+            $context = SerializationContext::create()->setGroups(['getPhones']);
+            $jsonPhone = $serializer->serialize($phone, 'json', $context);
             return new JsonResponse($jsonPhone, Response::HTTP_OK, [], true);
         }
 
@@ -210,46 +185,17 @@ class PhoneController extends AbstractController
      *     description="Update a phone"
      * )
      * 
-     * @OA\Parameter(
-     *     name="brand",
-     *     in="query",
-     *     description="The brand of the phone",
-     *     @OA\Schema(type="string")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="model",
-     *     in="query",
-     *     description="The model of the phone",
-     *     @OA\Schema(type="string")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="image",
-     *     in="query",
-     *     description="The image of the phone",
-     *     @OA\Schema(type="string")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="price",
-     *     in="query",
-     *     description="The price of the phone",
-     *     @OA\Schema(type="float")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="stock",
-     *     in="query",
-     *     description="The stock of the phone",
-     *     @OA\Schema(type="int")
-     * )
-     * 
-     * @OA\Parameter(
-     *     name="releaseAt",
-     *     in="query",
-     *     description="The release date of the phone",
-     *     @OA\Schema(type="string")
+     * @OA\RequestBody(
+     *     description="Update a phone",
+     *     required=true,
+     *     @OA\JsonContent(
+     *         @OA\Property(property="brand", type="string", default="Iphone"),
+     *         @OA\Property(property="model", type="string", default="15"),
+     *         @OA\Property(property="image", type="string", default="/images/iphone-15.jpg"),
+     *         @OA\Property(property="price", type="float", default="2400"),
+     *         @OA\Property(property="stock", type="int", default="12"),
+     *         @OA\Property(property="releaseAt", type="string", default="2023-10-21T07:11:07+00:00")
+     *     )
      * )
      * 
      * @OA\Tag(name="Phones")

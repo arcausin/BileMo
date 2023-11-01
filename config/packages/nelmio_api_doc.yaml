@@ -4,14 +4,52 @@ nelmio_api_doc:
             title: BileMo
             description: API documentation for BileMo
             version: 1.0.0
+        paths:
+            /api/login_check:
+                post:
+                    tags:
+                        - Token
+                    operationId: postCredentialsItem
+                    summary: Get JWT token
+                    requestBody:
+                        description: Get JWT token
+                        content:
+                            application/json:
+                                schema:
+                                    $ref: '#/components/schemas/Credentials'
+                    responses:
+                        '200':
+                            description: JWT token
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/Token'
+                        '401':
+                            description: Bad credentials
         components:
+            schemas:
+                Token:
+                    type: object
+                    properties:
+                        token:
+                            type: string
+                            readOnly: true
+                Credentials:
+                    type: object
+                    properties:
+                        username:
+                            type: string
+                            default: admin@admin.com
+                        password:
+                            type: string
+                            default: admin
             securitySchemes:
-                Bearer:
-                    type: http
-                    scheme: bearer
-                    bearerFormat: JWT
+                BearerAuth:
+                    type: apiKey
+                    in: header
+                    name: Authorization
         security:
-            - Bearer: []
+            - BearerAuth: []
     areas: # to filter documented areas
         path_patterns:
             - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
