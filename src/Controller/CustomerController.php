@@ -74,7 +74,6 @@ class CustomerController extends AbstractController
         $cacheKey = 'customers_' . $page . '_' . $limit;
 
         $jsonCustomerList = $cache->get($cacheKey, function (ItemInterface $item) use ($customerRepository, $page, $limit, $serializer) {
-            //echo "Cache miss\n";
             $item->tag('customersCache');
             $item->expiresAfter(300);
 

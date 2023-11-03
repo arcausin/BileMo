@@ -65,7 +65,6 @@ class PhoneController extends AbstractController
         $cacheKey = 'phones_' . $page . '_' . $limit;
 
         $jsonPhoneList = $cache->get($cacheKey, function (ItemInterface $item) use ($phoneRepository, $page, $limit, $serializer) {
-            //echo "Cache miss\n";
             $item->tag('phonesCache');
             $item->expiresAfter(300);
 
