@@ -1,0 +1,58 @@
+<mxfile host="app.diagrams.net" modified="2023-11-03T14:48:32.617Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0" etag="6rIWZGCmiM3xPtEBzv7m" version="22.0.8" type="device">
+  <diagram name="Page-1" id="kaoYOqhvuLUMERpKKi9R">
+    <mxGraphModel dx="2074" dy="-35" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="oAuCq6BkKggLuHPVJUeQ-19" value="" style="rounded=0;whiteSpace=wrap;html=1;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;labelBackgroundColor=none;" parent="1" vertex="1">
+          <mxGeometry x="19" y="1424" width="790" height="660" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-1" value="Phone" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="318" y="1794" width="260" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-2" value="&lt;div&gt;+ id : int&lt;/div&gt;&lt;div&gt;+ brand : string&lt;/div&gt;&lt;div&gt;+ model : string&lt;/div&gt;&lt;div&gt;+ image : string&lt;/div&gt;&lt;div&gt;+ price : float&lt;/div&gt;&lt;div&gt;+ stock : int&lt;/div&gt;&lt;div&gt;+ releaseAt : dateTime&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="7pwwrW8SkEieM3p2LjNU-1" vertex="1">
+          <mxGeometry y="26" width="260" height="114" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-3" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="7pwwrW8SkEieM3p2LjNU-1" vertex="1">
+          <mxGeometry y="140" width="260" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-4" value="&lt;div&gt;GET /phones &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt; or &lt;span style=&quot;background-color: rgb(255, 128, 0);&quot;&gt;Customer&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;POST /phones &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt;&lt;/div&gt;&lt;div&gt;GET /phones/{phone_id} &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt; or &lt;span style=&quot;background-color: rgb(255, 128, 0);&quot;&gt;Customer&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;PUT /phones/{phone_id} &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt;&lt;/div&gt;&lt;div&gt;DELETE /phones/{phone_id} &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="7pwwrW8SkEieM3p2LjNU-1" vertex="1">
+          <mxGeometry y="148" width="260" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="oAuCq6BkKggLuHPVJUeQ-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" parent="1" source="7pwwrW8SkEieM3p2LjNU-9" target="7pwwrW8SkEieM3p2LjNU-13" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-9" value="Customer" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="69" y="1511" width="300" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-10" value="&lt;div&gt;+ id : int&lt;/div&gt;&lt;div&gt;+ name : string&lt;/div&gt;&lt;div&gt;+ email : string&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ password : string&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ roles :string&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ createdAt : dateTime&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ consumers [] : array&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="7pwwrW8SkEieM3p2LjNU-9" vertex="1">
+          <mxGeometry y="26" width="300" height="114" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-11" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="7pwwrW8SkEieM3p2LjNU-9" vertex="1">
+          <mxGeometry y="140" width="300" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-12" value="&lt;div&gt;GET /customers &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;POST /customers &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;GET /customers/{customer_id} &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt; or &lt;span style=&quot;background-color: rgb(255, 128, 0);&quot;&gt;Customer&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;PUT /customers/{customer_id} &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;DELETE /customers/{customer_id} &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;strokeWidth=1;" parent="7pwwrW8SkEieM3p2LjNU-9" vertex="1">
+          <mxGeometry y="148" width="300" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-13" value="Consumer" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="532" y="1517" width="250" height="228" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-14" value="&lt;div&gt;+ id : int&lt;/div&gt;&lt;div&gt;+ customerId : int&lt;/div&gt;&lt;div&gt;+ firstName : string&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ lastName : string&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ email : string&lt;br&gt;&lt;/div&gt;&lt;div&gt;+ createdAt : dateTime&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="7pwwrW8SkEieM3p2LjNU-13" vertex="1">
+          <mxGeometry y="26" width="250" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-15" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="7pwwrW8SkEieM3p2LjNU-13" vertex="1">
+          <mxGeometry y="130" width="250" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="7pwwrW8SkEieM3p2LjNU-16" value="&lt;div&gt;GET /users &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt; or filtered by &lt;span style=&quot;background-color: rgb(255, 128, 0);&quot;&gt;Customer&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;POST /users &lt;span style=&quot;background-color: rgb(255, 128, 0);&quot;&gt;Customer&lt;/span&gt;&lt;/div&gt;&lt;div&gt;GET /users/{user_id} &lt;span style=&quot;background-color: rgb(255, 0, 0);&quot;&gt;Bilemo&lt;/span&gt; or&amp;nbsp; &lt;span style=&quot;background-color: rgb(255, 128, 0);&quot;&gt;Customer&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;PUT /users/{user_id} &lt;span style=&quot;background-color: rgb(255, 128, 0);&quot;&gt;Customer&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;DELETE /users/{user_id} &lt;span style=&quot;background-color: rgb(255, 128, 0);&quot;&gt;Customer&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="7pwwrW8SkEieM3p2LjNU-13" vertex="1">
+          <mxGeometry y="138" width="250" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="oAuCq6BkKggLuHPVJUeQ-9" value="*" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="502" y="1603" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="oAuCq6BkKggLuHPVJUeQ-10" value="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="369" y="1603" width="30" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
